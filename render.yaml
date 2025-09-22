@@ -7,7 +7,12 @@ services:
       rm -rf node_modules package-lock.json
       npm cache clean --force
       npm install --include=optional --verbose
-      npm run build
+      # Try SWC build first, fallback to Babel if it fails
+      npm run build || (
+        echo "SWC build failed, trying Babel fallback..." &&
+        cp vite.config.fallback.ts vite.config.ts &&
+        npm run build
+      )
     startCommand: npm start
     envVars:
       - key: NODE_ENV
