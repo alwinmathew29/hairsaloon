@@ -3,13 +3,7 @@ services:
     name: hairsaloon
     runtime: node
     plan: free
-    buildCommand: |
-      npm install &&
-      npm run build &&
-      echo "Build completed. Checking dist directory:" &&
-      ls -la dist/ &&
-      ls -la dist/spa/ &&
-      ls -la dist/server/
+    buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
