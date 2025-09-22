@@ -85,7 +85,13 @@
     "vite": "^7.1.2",
     "vitest": "^3.2.4"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.24.2"
+  },
   "engines": {
     "node": "22.x"
+  },
+  "overrides": {
+    "rollup": "^4.24.2"
   }
 }
