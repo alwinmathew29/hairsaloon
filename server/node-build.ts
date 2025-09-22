@@ -12,6 +12,11 @@ const distPath = path.join(__dirname, "../spa");
 // Serve static files
 app.use(express.static(distPath));
 
+// Add health check endpoint for Render
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "healthy", timestamp: new Date().toISOString() });
+});
+
 // Handle React Router - serve index.html for all non-API routes
 app.get("*", (req, res) => {
   // Don't serve index.html for API routes
@@ -22,10 +27,10 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`🚀 Fusion Starter server running on port ${port}`);
-  console.log(`📱 Frontend: http://localhost:${port}`);
-  console.log(`🔧 API: http://localhost:${port}/api`);
+  console.log(`📱 Server is ready and accepting connections`);
+  console.log(`🔧 API endpoints available at /api`);
 });
 
 // Graceful shutdown
