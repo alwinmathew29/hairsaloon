@@ -22,12 +22,19 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
-    // Disable minification for debugging if needed
     minify: mode === "production" ? "esbuild" : false,
     sourcemap: mode === "development",
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
   plugins: [
-    react(),
+    react({
+      // Ensure proper JSX runtime for production
+      jsxRuntime: 'automatic',
+    }),
     // Only used in development, ignored in production
     expressPlugin(),
   ],
@@ -37,9 +44,14 @@ export default defineConfig(({ mode }) => ({
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
-  // Define environment variables
+  // Define environment variables properly
   define: {
+    'process.env.NODE_ENV': JSON.stringify(mode === 'production' ? 'production' : 'development'),
     __VITE_MODE__: JSON.stringify(mode),
+  },
+  // Ensure proper optimization for production
+  esbuild: {
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
 }));
 

@@ -15,18 +15,49 @@ export function createServer() {
     optionsSuccessStatus: 200
   };
 
+  console.log(`🔧 CORS configured for environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 Allowed origins:`, corsOptions.origin);
+
   // Middleware
   app.use(cors(corsOptions));
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+  // Request logging middleware
+  app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
+  });
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
-    const ping = process.env.PING_MESSAGE ?? "ping";
-    res.json({ message: ping });
+    try {
+      const ping = process.env.PING_MESSAGE ?? "ping";
+      console.log(`🏓 Ping endpoint called, responding with: ${ping}`);
+      res.json({ message: ping, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error(`❌ Error in ping endpoint:`, error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
-  app.get("/api/demo", handleDemo);
+  app.get("/api/demo", (req, res) => {
+    try {
+      handleDemo(req, res);
+    } catch (error) {
+      console.error(`❌ Error in demo endpoint:`, error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Global error handler
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error(`❌ Global error handler caught:`, err);
+    res.status(500).json({ 
+      error: "Internal server error", 
+      message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+    });
+  });
 
   return app;
 }
