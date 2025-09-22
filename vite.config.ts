@@ -3,7 +3,10 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { createServer } from "./server";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  const isProduction = mode === 'production';
+  
+  return {
   root: path.resolve(__dirname, "."),
   server: {
     host: "::",
@@ -32,8 +35,10 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react({
-      // Ensure proper JSX runtime for production
+      // Use automatic JSX runtime
       jsxRuntime: 'automatic',
+      // Fast refresh only in development
+      fastRefresh: mode === 'development',
     }),
     // Only used in development, ignored in production
     expressPlugin(),
@@ -48,12 +53,17 @@ export default defineConfig(({ mode }) => ({
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode === 'production' ? 'production' : 'development'),
     __VITE_MODE__: JSON.stringify(mode),
+    // Force React into production mode
+    __DEV__: JSON.stringify(mode !== 'production'),
+    'import.meta.env.DEV': JSON.stringify(mode !== 'production'),
+    'import.meta.env.PROD': JSON.stringify(mode === 'production'),
   },
   // Ensure proper optimization for production
   esbuild: {
     drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
-}));
+};
+});
 
 // Dev-only plugin to run Express inside Vite dev server
 function expressPlugin(): Plugin {
